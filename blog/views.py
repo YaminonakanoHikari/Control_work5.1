@@ -23,8 +23,10 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        # чтобы drf-yasg не падал
+        if getattr(self, 'swagger_fake_view', False):
+            return Comment.objects.none()
         return Comment.objects.filter(post_id=self.kwargs['pk'], is_approved=True)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, post_id=self.kwargs['pk'])
-
